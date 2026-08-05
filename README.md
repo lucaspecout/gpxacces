@@ -9,10 +9,10 @@ MVP auto-hébergé d'analyse **indicative** de l'accessibilité d'un parcours GP
 Prérequis : Docker et Docker Compose.
 
 ```bash
-cp .env.example .env
-# Modifier au minimum POSTGRES_PASSWORD et ADMIN_PASSWORD
 docker compose up -d --build
 ```
+
+Toute la configuration se trouve dans `docker-compose.yml`. Les mots de passe PostgreSQL et administrateur y sont déjà initialisés avec des valeurs robustes. Restreignez l'accès à ce fichier et renouvelez ces secrets s'il est partagé.
 
 Ouvrir `http://localhost:3117`. État de l'API : `http://localhost:3117/api/health`; OpenAPI : `http://localhost:3117/api/docs`.
 
@@ -36,7 +36,7 @@ Essayez [demo.gpx](tests/data/demo.gpx). La longueur de segmentation est réglab
 ## Exploitation
 
 - Les ports PostgreSQL et Redis ne sont pas publiés.
-- Les secrets viennent uniquement de `.env`, qui est ignoré par Git.
+- La configuration et les secrets sont déclarés directement dans `docker-compose.yml`, conformément au mode de déploiement retenu. Restreignez l'accès à ce fichier.
 - Le conteneur backend tourne sans privilèges.
 - Nginx limite l'import à 10 Mo et pose les principaux en-têtes de sécurité.
 - Sauvegarde : `./scripts/backup.ps1`; restauration documentée dans [operations.md](docs/operations.md).

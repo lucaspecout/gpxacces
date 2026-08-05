@@ -2,9 +2,9 @@ services:
   db:
     image: postgis/postgis:16-3.4-alpine
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-gpxaccess}
-      POSTGRES_USER: ${POSTGRES_USER:-gpxaccess}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: gpxaccess
+      POSTGRES_USER: gpxaccess
+      POSTGRES_PASSWORD: "G7wN4qX9mK2vR8cT6pL3sD5hF1zB0yUa"
     volumes: [postgres_data:/var/lib/postgresql/data]
     healthcheck:
       test: [CMD-SHELL, "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
@@ -26,7 +26,17 @@ services:
     networks: [internal]
   backend:
     build: ./backend
-    env_file: [.env]
+    environment:
+      APP_NAME: GPX Accès Secours
+      ENVIRONMENT: production
+      MAX_UPLOAD_MB: "10"
+      SEGMENT_LENGTH_M: "30"
+      OVERPASS_URLS: https://overpass-api.de/api/interpreter,https://overpass.kumi.systems/api/interpreter
+      OVERPASS_TIMEOUT_SECONDS: "25"
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql+psycopg://gpxaccess:G7wN4qX9mK2vR8cT6pL3sD5hF1zB0yUa@db:5432/gpxaccess
+      ADMIN_EMAIL: admin@example.org
+      ADMIN_PASSWORD: "V9rK2xQ7nM4cW8pT1yH6sF3dL5zB0uEa"
     depends_on:
       redis: {condition: service_healthy}
       db: {condition: service_healthy}
@@ -35,7 +45,17 @@ services:
   worker:
     build: ./backend
     command: celery -A app.worker.celery worker --loglevel=INFO
-    env_file: [.env]
+    environment:
+      APP_NAME: GPX Accès Secours
+      ENVIRONMENT: production
+      MAX_UPLOAD_MB: "10"
+      SEGMENT_LENGTH_M: "30"
+      OVERPASS_URLS: https://overpass-api.de/api/interpreter,https://overpass.kumi.systems/api/interpreter
+      OVERPASS_TIMEOUT_SECONDS: "25"
+      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql+psycopg://gpxaccess:G7wN4qX9mK2vR8cT6pL3sD5hF1zB0yUa@db:5432/gpxaccess
+      ADMIN_EMAIL: admin@example.org
+      ADMIN_PASSWORD: "V9rK2xQ7nM4cW8pT1yH6sF3dL5zB0uEa"
     depends_on:
       redis: {condition: service_healthy}
     restart: unless-stopped
@@ -46,7 +66,7 @@ services:
     networks: [internal]
   nginx:
     image: nginx:1.27-alpine
-    ports: ["${HTTP_PORT:-3117}:80"]
+    ports: ["3117:80"]
     volumes:
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on: [backend, frontend]

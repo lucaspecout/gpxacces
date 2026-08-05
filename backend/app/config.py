@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     app_name: str = "GPX Accès Secours"
@@ -7,7 +7,5 @@ class Settings(BaseSettings):
     overpass_urls: str = "https://overpass-api.de/api/interpreter,https://overpass.kumi.systems/api/interpreter"
     overpass_timeout_seconds: float = 25
     redis_url: str = "redis://redis:6379/0"
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 settings = Settings()
-
