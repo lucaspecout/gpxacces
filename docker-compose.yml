@@ -61,10 +61,7 @@ services:
     restart: unless-stopped
     networks: [internal]
   frontend:
-    build:
-      context: ./frontend
-      args:
-        GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
+    build: ./frontend
     restart: unless-stopped
     networks: [internal]
   nginx:

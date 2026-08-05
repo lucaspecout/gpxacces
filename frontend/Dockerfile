@@ -1,7 +1,5 @@
 FROM node:22-alpine AS build
 WORKDIR /app
-ARG GOOGLE_MAPS_API_KEY=""
-ENV VITE_GOOGLE_MAPS_API_KEY=$GOOGLE_MAPS_API_KEY
 COPY package.json package-lock.json* ./
 RUN npm install
 COPY . .
