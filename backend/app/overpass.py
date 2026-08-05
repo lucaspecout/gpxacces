@@ -1,3 +1,4 @@
+import asyncio
 import json
 from itertools import islice
 from math import cos, radians
@@ -28,23 +29,28 @@ async def fetch_ways(points: list[Point]) -> tuple[list[dict], bool]:
     stride=max(1,len(points)//80)
     sampled=points[::stride]
     if sampled[-1] != points[-1]: sampled.append(points[-1])
-    ways: dict[int,dict]={}; successful_batches=0
+    ways: dict[int,dict]={}
     headers={"User-Agent":"GPXAccess/0.3"}
-    async with httpx.AsyncClient(timeout=settings.overpass_timeout_seconds,follow_redirects=True) as client:
-        for batch in _batches(sampled,40):
+    async with httpx.AsyncClient(timeout=min(settings.overpass_timeout_seconds,12),follow_redirects=True) as client:
+        async def fetch_batch(batch: list[Point]):
             clauses="".join(f'way["highway"](around:120,{p.lat},{p.lon});' for p in batch)
-            query=f'[out:json][timeout:20];({clauses});out tags geom;'
+            query=f'[out:json][timeout:10];({clauses});out tags geom;'
             for url in settings.overpass_urls.split(","):
                 try:
                     response=await client.post(url.strip(),data={"data":query},headers=headers)
                     response.raise_for_status()
-                    elements=response.json().get("elements",[])
-                    for way in elements:
-                        if way.get("type")=="way" and way.get("id") is not None: ways[way["id"]]=way
-                    successful_batches+=1; break
+                    return response.json().get("elements",[])
                 except (httpx.HTTPError,json.JSONDecodeError,ValueError):
                     continue
-    return list(ways.values()), successful_batches > 0
+            return None
+        results=await asyncio.gather(*(fetch_batch(batch) for batch in _batches(sampled,40)))
+    successful=False
+    for elements in results:
+        if elements is None: continue
+        successful=True
+        for way in elements:
+            if way.get("type")=="way" and way.get("id") is not None: ways[way["id"]]=way
+    return list(ways.values()), successful
 
 def nearest_way(point: Point, ways: list[dict]) -> WayInfo | None:
     best: tuple[float,dict] | None = None
