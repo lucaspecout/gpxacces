@@ -1,0 +1,2 @@
+{"scripts":{"dev":"vite","build":"tsc -b && vite build","test":"vitest run","lint":"eslint ."},"dependencies":{"@vitejs/plugin-react":"latest","vite":"latest","typescript":"latest","react":"latest","react-dom":"latest","leaflet":"latest","react-leaflet":"latest"},"devDependencies":{"@types/react":"latest","@types/react-dom":"latest","@types/leaflet":"latest","vitest":"latest","eslint":"latest"}}
+
