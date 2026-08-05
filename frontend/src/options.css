@@ -13,3 +13,4 @@
 .tool-footer{display:flex;gap:7px;margin-top:8px}.tool-footer button{flex:1;padding:9px;font-size:11px}.tool-footer button:first-child{background:#6e7b82}
 .op-marker-wrap{background:transparent;border:0}.op-marker{display:grid;place-items:center;width:36px;height:36px;border:3px solid white;border-radius:50%;background:var(--marker);box-shadow:0 2px 8px #0007;font-size:18px}
 .tool-add .leaflet-container,.tool-streetview .leaflet-container{cursor:crosshair}.popup-delete{margin-top:7px;padding:6px 9px;font-size:11px}.leaflet-popup-content button{color:white}
+.map-fallback{min-height:100vh;display:grid;place-content:center;gap:12px;text-align:center;padding:30px;background:#eef1f3;color:#263845}.map-fallback span{max-width:520px}.map-fallback button{justify-self:center}
