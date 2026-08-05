@@ -19,10 +19,10 @@ const pointTypes:Record<PointKind,{icon:string;label:string;color:string}>={
   aid:{icon:'✚',label:'Poste de secours',color:'#d93434'},vehicle:{icon:'🚒',label:'Véhicule',color:'#e36b18'},
   danger:{icon:'⚠',label:'Danger / obstacle',color:'#b42318'},other:{icon:'●',label:'Autre repère',color:'#5e4aa8'}
 };
-const maps:Record<BaseMap,{url:string;attribution:string;maxZoom?:number}>={
-  standard:{url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attribution:'© OpenStreetMap contributors'},
+const maps:Record<BaseMap,{url:string;attribution:string;maxZoom:number}>={
+  standard:{url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',attribution:'© OpenStreetMap contributors',maxZoom:19},
   topo:{url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',attribution:'© OpenStreetMap · SRTM | OpenTopoMap',maxZoom:17},
-  humanitarian:{url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',attribution:'© OpenStreetMap contributors · HOT'},
+  humanitarian:{url:'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png',attribution:'© OpenStreetMap contributors · HOT',maxZoom:20},
   satellite:{url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',attribution:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics et partenaires',maxZoom:19}
 };
 
@@ -38,7 +38,7 @@ async function parsePreview(file:File):Promise<FeatureCollection>{
   const limit=Math.max(500,Math.floor(6000/lines.length));lines=lines.map(line=>reduceLine(line,limit));
   return {type:'FeatureCollection',features:lines.map(line=>({type:'Feature',properties:{preview:true},geometry:{type:'LineString',coordinates:line}}))};
 }
-function FitTrace({data}:{data?:FeatureCollection}){const map=useMap();useEffect(()=>{if(!data?.features.length)return;try{const bounds=L.geoJSON(data).getBounds();if(bounds.isValid())map.fitBounds(bounds,{padding:[28,28],maxZoom:18})}catch{ /* Le reste de l'interface doit rester disponible. */ }},[data,map]);return null}
+function FitTrace({data}:{data?:FeatureCollection}){const map=useMap();useEffect(()=>{map.dragging.enable();map.scrollWheelZoom.enable();map.doubleClickZoom.enable();map.touchZoom.enable();map.invalidateSize({pan:false});if(!data?.features.length)return;try{const bounds=L.geoJSON(data).getBounds();if(bounds.isValid())map.fitBounds(bounds,{padding:[28,28],maxZoom:18})}catch{ /* Le reste de l'interface doit rester disponible. */ }},[data,map]);return null}
 function MapActions({tool,onAdd,onCoordinate}:{tool:Tool;onAdd:(lat:number,lon:number,kind:PointKind)=>void;onCoordinate:(lat:number,lon:number)=>void}){useMapEvents({click(e){onCoordinate(e.latlng.lat,e.latlng.lng);if(tool.mode==='add')onAdd(e.latlng.lat,e.latlng.lng,tool.kind);if(tool.mode==='streetview'){const point=`${e.latlng.lat},${e.latlng.lng}`;window.open(`https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${encodeURIComponent(point)}`,'_blank','noopener,noreferrer')}}});return null}
 function Locate({request,onFound}:{request:number;onFound:(lat:number,lon:number)=>void}){const map=useMap();useEffect(()=>{if(!request)return;map.locate({setView:true,maxZoom:17,enableHighAccuracy:true});const found=(e:L.LocationEvent)=>onFound(e.latlng.lat,e.latlng.lng);map.once('locationfound',found);return()=>{map.off('locationfound',found)}},[request,map,onFound]);return null}
 function markerIcon(kind:PointKind){const type=pointTypes[kind];return L.divIcon({className:'op-marker-wrap',html:`<span class="op-marker" style="--marker:${type.color}">${type.icon}</span>`,iconSize:[36,42],iconAnchor:[18,38],popupAnchor:[0,-38]})}
