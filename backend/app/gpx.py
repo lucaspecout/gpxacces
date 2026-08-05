@@ -26,7 +26,7 @@ def parse_gpx(data: bytes) -> tuple[str, list[Point]]:
     name = next((e.text for e in root.iter() if e.tag.endswith("name") and e.text), "Parcours")
     points: list[Point] = []
     for node in root.iter():
-        if not node.tag.endswith("trkpt"):
+        if not (node.tag.endswith("trkpt") or node.tag.endswith("rtept")):
             continue
         try:
             lat, lon = float(node.attrib["lat"]), float(node.attrib["lon"])
@@ -46,10 +46,11 @@ def resample(points: list[Point], target_m: float) -> list[tuple[Point, Point]]:
     result: list[tuple[Point, Point]] = []
     start = points[0]
     accumulated = 0.0
+    previous = start
     for current in points[1:]:
-        accumulated += distance(start, current)
+        accumulated += distance(previous, current)
         if accumulated >= target_m:
             result.append((start, current)); start = current; accumulated = 0.0
+        previous = current
     if start != points[-1]: result.append((start, points[-1]))
     return result
-
